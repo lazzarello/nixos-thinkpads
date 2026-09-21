@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ config, pkgs, ... }:
 
 {
   # Graphics and window management
@@ -13,80 +13,67 @@
     enableAudioWavelength = false;
   };
 
-  # Graphical login screen.
-  services.displayManager = {
-    sddm = {
-      enable = true;
-      wayland.enable = true;
-
-      # NOTE: these two are inert under DisplayServer=wayland. sddm 0.21
-      # applies CursorTheme only on the X11 path (the package contains no
-      # reference to XCURSOR at all), so it never reaches Weston. Kept because
-      # it is correct and documents intent, but the fix that actually works is
-      # the "default" theme package and XCURSOR_THEME below. Merged over the
-      # module defaults with recursiveUpdate, so ThemeDir/FacesDir survive.
-      settings.Theme = {
-        CursorTheme = "Adwaita";
-        CursorSize = 24;
-      };
+  # Graphical login screen: greetd running Noctalia Greeter.
+  #
+  # Replaced sddm. Under DisplayServer=wayland, sddm runs Weston as its
+  # greeter compositor, and Weston reads its cursor theme only from the
+  # [shell] section of weston.ini. Three successive fixes -- installing a
+  # cursor theme, setting XCURSOR_THEME, and injecting [shell] into a
+  # regenerated weston.ini -- all failed to produce a visible pointer at the
+  # login screen, while niri itself was fine. Noctalia Greeter brings its own
+  # wlroots compositor which reads XCURSOR_THEME/SIZE/PATH directly (verified
+  # in the binary), so it does not depend on weston.ini at all.
+  #
+  # Note: nixpkgs 26.05 has the noctalia-greeter *package* but not the
+  # services.displayManager.noctalia-greeter *module* (that is in unstable),
+  # so greetd is configured directly here.
+  services.greetd = {
+    enable = true;
+    settings.default_session = {
+      command = "${pkgs.noctalia-greeter}/bin/noctalia-greeter-session";
+      user = "greeter";
     };
-    defaultSession = "niri";
   };
 
-  # Cursor theme for the SDDM greeter (Weston) and for niri.
-  #
-  # Two separate problems had to be fixed here:
-  #
-  # 1. XCURSOR_PATH is exported by /etc/set-environment, which only applies to
-  #    login shells. The display-manager unit does not get it, so Weston fell
-  #    back to libXcursor's compiled-in path, which contains no themes.
-  #
-  # 2. Nothing set XCURSOR_THEME, so both Weston and niri requested the theme
-  #    literally named "default", which does not exist. niri has a built-in
-  #    fallback bitmap and stayed usable; Weston has none and drew no pointer
-  #    at all. Hence a visible cursor in niri but an invisible one at login.
-  systemd.services.display-manager.environment = {
-    XCURSOR_PATH = "/run/current-system/sw/share/icons";
-    XCURSOR_THEME = "Adwaita";
-    XCURSOR_SIZE = "24";
-  };
+  # greetd's own module sets services.displayManager.enable, which generates
+  # the wayland-sessions entries the greeter lists. Keep niri preselected.
+  services.displayManager.defaultSession = "niri";
 
-  # Also set it for user sessions, so niri stops asking for "default".
-  # This half works: niri now loads Adwaita at the requested size.
+  # The session entries live in their own store path, not in
+  # /run/current-system/sw/share/wayland-sessions (which does not exist here).
+  # The greeter discovers sessions via XDG_DATA_DIRS, but NixOS only sets that
+  # for user sessions -- not for the greetd service -- so without this the
+  # greeter would show an empty session list.
+  systemd.services.greetd.environment.XDG_DATA_DIRS =
+    "${config.services.displayManager.sessionData.desktops}/share";
+
+  # State directory for greeter.toml, per the package's tmpfiles.d drop-in.
+  systemd.tmpfiles.packages = [ pkgs.noctalia-greeter ];
+
+  # Declarative greeter configuration. The greeter reads [cursor] theme/size/
+  # path, confirmed from the binary's own help string. Setting path explicitly
+  # avoids depending on the greeter user's environment, which is the class of
+  # problem that made the sddm/Weston pointer invisible.
+  environment.etc."noctalia-greeter/greeter.toml".text = ''
+    [cursor]
+    theme = "Adwaita"
+    size = 24
+    path = "/run/current-system/sw/share/icons"
+
+    [keyboard]
+    layout = "us"
+  '';
+
+  # Cursor theme for user sessions.
+  #
+  # Nothing sets XCURSOR_THEME by default, so clients request the theme
+  # literally named "default". That name did not exist, so niri fell back to
+  # its built-in bitmap (usable but tiny) while Weston drew nothing at all.
+  # Setting this explicitly makes niri load real Adwaita cursors at 24px.
   environment.sessionVariables = {
     XCURSOR_THEME = "Adwaita";
     XCURSOR_SIZE = "24";
   };
-
-  # The greeter needed a third fix. Weston's core reads the cursor theme only
-  # from the [shell] section of weston.ini -- not from XCURSOR_THEME, and not
-  # from sddm's CursorTheme. The nixpkgs sddm module generates an ini with
-  # only [libinput] and [keyboard], so Weston fell back to the theme named
-  # "default" and drew nothing.
-  #
-  # Rebuild the compositor command with the module's own ini contents plus a
-  # [shell] section. Keep --shell=kiosk, matching upstream.
-  services.displayManager.sddm.wayland.compositorCommand =
-    let
-      xcfg = config.services.xserver;
-      westonIni = (pkgs.formats.ini { }).generate "weston.ini" {
-        libinput = {
-          enable-tap = config.services.libinput.mouse.tapping;
-          left-handed = config.services.libinput.mouse.leftHanded;
-        };
-        keyboard = {
-          keymap_model = xcfg.xkb.model;
-          keymap_layout = xcfg.xkb.layout;
-          keymap_variant = xcfg.xkb.variant;
-          keymap_options = xcfg.xkb.options;
-        };
-        shell = {
-          cursor-theme = "Adwaita";
-          cursor-size = 24;
-        };
-      };
-    in
-    "${lib.getExe pkgs.weston} --shell=kiosk -c ${westonIni}";
 
   # Audio and Bluetooth.
   security.rtkit.enable = true;
@@ -103,6 +90,8 @@
 
     # Provides the Adwaita xcursor theme under share/icons/Adwaita/cursors.
     adwaita-icon-theme
+
+    noctalia-greeter
 
     # A theme actually named "default", inheriting Adwaita. This is the
     # belt-and-braces half of the fix: any client that asks for "default"
