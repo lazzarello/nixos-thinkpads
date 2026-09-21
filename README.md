@@ -115,6 +115,42 @@ ls -l /dev/dri/by-path/
 cat /sys/bus/pci/devices/0000:01:00.0/power/runtime_status
 ```
 
+## Idle, lock and suspend policy
+
+Ownership is split, and it matters:
+
+| Behavior | Owner | Setting |
+|---|---|---|
+| Lid close → suspend | logind | `HandleLidSwitch=suspend` (default, works) |
+| System idle action | logind | `IdleAction=ignore` — deliberately unused |
+| Idle → blank / lock / suspend | **DMS** `IdleService` | per-power-source timeouts |
+| Lock before suspend | **DMS** | `lockBeforeSuspend` |
+
+DMS owns idle rather than logind because it uses the Wayland idle-notify
+protocol, so it sees real input activity and respects inhibitors — fullscreen
+video will not blank the screen. logind's `IdleAction` cannot do that. Do not
+configure both.
+
+Current values (seconds; `0` means never):
+
+| | AC | Battery |
+|---|---|---|
+| Monitor off | 900 (15 m) | 300 (5 m) |
+| Lock | 1200 (20 m) | 600 (10 m) |
+| Suspend | 0 (never) | 1800 (30 m) |
+
+Keep `lock >= monitor-off` and `suspend > lock`, so the screen blanks before it
+locks and locks before it sleeps.
+
+**These live in `~/.config/DankMaterialShell/settings.json`, which is mutable
+user state — not NixOS-managed and not in this repo.** Generations will not roll
+it back. DMS rewrites the file at runtime, so change it through the DMS settings
+UI, not by hand. Back it up if you care:
+
+```sh
+cp ~/.config/DankMaterialShell/settings.json ~/nixos/dms-settings.json.bak
+```
+
 ## Gotchas found the hard way
 
 **Hand edits to generated files in `/etc` are discarded on activation.**
@@ -137,3 +173,27 @@ the login screen, but a working one in Niri, turned out to be three causes:
    package contains no reference to `XCURSOR`.
 
 See the comments in `desktop.nix` for the details.
+
+**A shell can hide whole features when a service it reads from is missing.**
+The "Power source" AC/Battery selector in DMS's Power & Sleep settings simply
+was not rendered, making the battery-side idle timeouts unreachable. The
+battery was fine — `BAT0` read 98% in sysfs the whole time. But DMS reads
+batteries through **UPower**, not sysfs:
+
+```qml
+// BatteryService.qml
+readonly property var batteries: UPower.devices.values.filter(dev => dev.isLaptopBattery)
+readonly property bool batteryAvailable: batteries.length > 0
+```
+
+`services.upower.enable` was `false`, so `batteryAvailable` was false and every
+battery-conditional control was hidden. The `programs.dms-shell` module enables
+`power-profiles-daemon` but not `upower`.
+
+General lesson, and it recurred three times in this setup: when a setting seems
+not to apply, verify *which API the consumer actually reads* before assuming the
+value is wrong. Checking sysfs proved nothing about what DMS could see, just as
+setting `CursorTheme` proved nothing about what Weston read.
+
+**`power-profiles-daemon` is enabled by the DMS module**, not by this config. Do
+not add TLP without deciding which daemon owns power management; they conflict.

@@ -84,9 +84,30 @@
   };
   hardware.bluetooth.enable = true;
 
+  # Battery and power-source reporting.
+  #
+  # DMS reads the battery through UPower (BatteryService.qml filters
+  # UPower.devices for isLaptopBattery), not from sysfs. Without upower,
+  # batteryAvailable is false, so DMS hides every battery-conditional control
+  # -- including the "Power source" AC/Battery selector in Power & Sleep,
+  # which makes the battery-side idle timeouts unreachable in the UI.
+  #
+  # The dms-shell module enables power-profiles-daemon but not upower.
+  services.upower.enable = true;
+
   environment.systemPackages = with pkgs; [
     alacritty
     xwayland-satellite
+
+    # Screenshot, annotation and screen recording. DMS exposes screenshot and
+    # clipboard IPC targets and binds keys to them, but does not pull in the
+    # binaries, so those actions fail silently without these.
+    grim # capture
+    slurp # select a region
+    satty # annotate
+    wl-clipboard # wl-copy / wl-paste
+    cliphist # clipboard history, used by the DMS clipboard UI
+    wl-screenrec # screen recording (wlroots, hardware encoded)
 
     # Provides the Adwaita xcursor theme under share/icons/Adwaita/cursors.
     adwaita-icon-theme
