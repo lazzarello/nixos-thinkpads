@@ -33,6 +33,69 @@ Commit after a `switch` succeeds, so `git log` tracks known-good states.
 If a rebuild breaks the desktop, pick the previous generation in the
 systemd-boot menu, then `git revert`.
 
+## Verified behavior
+
+Tested 2026-09-21 on this hardware. All checks passed.
+
+| # | Check | Result |
+|---|---|---|
+| 1 | Niri renders on Intel; NVIDIA runtime-suspends | PASS |
+| 2 | HDMI hot-plug, both screens usable | PASS |
+| 3 | Disconnect leaves windows reachable on the panel | PASS |
+| 4 | NVIDIA returns to idle suspend after unplug | PASS, ~7 s |
+| 5 | Suspend/resume, HDMI connected and disconnected | PASS |
+| 6 | Audio follows output changes | PASS (recording/brightness/battery still open) |
+
+Details worth keeping:
+
+- **Hot-plug.** The LG 4K is detected by name and gets its preferred
+  3840x2160@60 with no manual config. Niri places it at logical x=1707,
+  directly right of eDP-1's 1706 px logical width. Each output keeps its own
+  workspace set.
+- **NVIDIA power.** Unplug to `suspended` takes about 7 s, consistent with
+  `power/autosuspend_delay_ms=5000`. Across a session with four hot-plug
+  cycles the card was suspended ~93% of the time. The audio function
+  `0000:01:00.1` suspends too.
+- **Suspend is real S3**, not a reboot: `PM: suspend entry (deep)` →
+  `ACPI: PM: Waking up from system sleep state S3`. The niri process keeps the
+  same PID across cycles, and both outputs return to identical geometry.
+- **Nouveau survived all of it** with zero driver errors, including waking the
+  Quadro to restore a 4K external mode. The proprietary `legacy_580` branch is
+  therefore **not needed**. Do not switch drivers without a reason.
+- **Audio crosses a GPU boundary.** HDMI audio is on the NVIDIA card
+  (`card 0`, `GP107GL`); the analog headphone jack is on the Intel PCH
+  (`card 1`). WirePlumber switches between them automatically on plug, and
+  each sink keeps an independent volume.
+
+Two log lines look alarming on resume but are benign:
+
+```
+mei_hdcp ...: bound 0000:00:02.0 (ops i915_hdcp_ops [i915])   # HDCP rebind
+usb 1-8: reset high-speed USB device ... using xhci_hcd        # USB re-enumeration
+```
+
+### Reproducing the checks
+
+`niri msg` needs the socket, which an SSH session does not inherit:
+
+```sh
+export NIRI_SOCKET=$(ls -t /run/user/1000/niri.wayland-*.sock | head -1)
+niri msg outputs
+```
+
+```sh
+# connector states and GPU power
+for c in /sys/class/drm/card*-*/status; do echo "$c $(cat $c)"; done
+cat /sys/bus/pci/devices/0000:01:00.0/power/runtime_status
+
+# suspend cycles, and driver errors across them
+journalctl -k -b | grep -E 'PM: suspend (entry|exit)|sleep state S3'
+journalctl -k -b | grep -iE 'nouveau.*(fail|error|timeout)|i915.*(fail|error|hang)'
+
+# audio sinks
+XDG_RUNTIME_DIR=/run/user/1000 wpctl status
+```
+
 ## Hardware notes
 
 Dual GPU. Niri renders on the Intel iGPU and leaves the NVIDIA Quadro

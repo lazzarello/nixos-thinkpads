@@ -1,0 +1,62 @@
+[10:51:13] card0-DP-1=disconnected card0-DP-2=disconnected card0-eDP-2=disconnected card0-HDMI-A-1=disconnected card1-eDP-1=connected nvidia=suspended
+    Output "AU Optronics 0x32EB Unknown" (eDP-1)
+      Current mode: 3840x2160 @ 60.002 Hz (preferred)
+      Logical position: 0, 0
+
+[10:55:54] card0-DP-1=disconnected card0-DP-2=disconnected card0-eDP-2=disconnected card0-HDMI-A-1=connected card1-eDP-1=connected nvidia=active
+    Output "AU Optronics 0x32EB Unknown" (eDP-1)
+      Current mode: 3840x2160 @ 60.002 Hz (preferred)
+      Logical position: 0, 0
+    Output "LG Electronics LG HDR 4K 110MXDM7H234" (HDMI-A-1)
+      Current mode: 3840x2160 @ 60.000 Hz (preferred)
+      Logical position: 1707, 0
+
+[10:59:56] card0-DP-1=disconnected card0-DP-2=disconnected card0-eDP-2=disconnected card0-HDMI-A-1=disconnected card1-eDP-1=connected nvidia=active
+    Output "AU Optronics 0x32EB Unknown" (eDP-1)
+      Current mode: 3840x2160 @ 60.002 Hz (preferred)
+      Logical position: 0, 0
+
+[11:00:03] card0-DP-1=disconnected card0-DP-2=disconnected card0-eDP-2=disconnected card0-HDMI-A-1=disconnected card1-eDP-1=connected nvidia=suspending
+    Output "AU Optronics 0x32EB Unknown" (eDP-1)
+      Current mode: 3840x2160 @ 60.002 Hz (preferred)
+      Logical position: 0, 0
+
+[11:00:04] card0-DP-1=disconnected card0-DP-2=disconnected card0-eDP-2=disconnected card0-HDMI-A-1=disconnected card1-eDP-1=connected nvidia=suspended
+    Output "AU Optronics 0x32EB Unknown" (eDP-1)
+      Current mode: 3840x2160 @ 60.002 Hz (preferred)
+      Logical position: 0, 0
+
+[11:01:11] card0-DP-1=disconnected card0-DP-2=disconnected card0-eDP-2=disconnected card0-HDMI-A-1=connected card1-eDP-1=connected nvidia=active
+    Output "AU Optronics 0x32EB Unknown" (eDP-1)
+      Current mode: 3840x2160 @ 60.002 Hz (preferred)
+      Logical position: 0, 0
+    Output "LG Electronics LG HDR 4K 110MXDM7H234" (HDMI-A-1)
+      Current mode: 3840x2160 @ 60.000 Hz (preferred)
+      Logical position: 1707, 0
+
+[11:01:15] card0-DP-1=disconnected card0-DP-2=disconnected card0-eDP-2=disconnected card0-HDMI-A-1=disconnected card1-eDP-1=connected nvidia=active
+    Output "AU Optronics 0x32EB Unknown" (eDP-1)
+      Current mode: 3840x2160 @ 60.002 Hz (preferred)
+      Logical position: 0, 0
+
+[11:01:16] card0-DP-1=disconnected card0-DP-2=disconnected card0-eDP-2=disconnected card0-HDMI-A-1=connected card1-eDP-1=connected nvidia=active
+    Output "AU Optronics 0x32EB Unknown" (eDP-1)
+      Current mode: 3840x2160 @ 60.002 Hz (preferred)
+      Logical position: 0, 0
+    Output "LG Electronics LG HDR 4K 110MXDM7H234" (HDMI-A-1)
+      Current mode: 3840x2160 @ 60.000 Hz (preferred)
+      Logical position: 1707, 0
+
+[11:03:09] card0-DP-1=disconnected card0-DP-2=disconnected card0-eDP-2=disconnected card0-HDMI-A-1=disconnected card1-eDP-1=connected nvidia=active
+    Output "AU Optronics 0x32EB Unknown" (eDP-1)
+      Current mode: 3840x2160 @ 60.002 Hz (preferred)
+      Logical position: 0, 0
+
+[11:03:10] card0-DP-1=disconnected card0-DP-2=disconnected card0-eDP-2=disconnected card0-HDMI-A-1=connected card1-eDP-1=connected nvidia=active
+    Output "AU Optronics 0x32EB Unknown" (eDP-1)
+      Current mode: 3840x2160 @ 60.002 Hz (preferred)
+      Logical position: 0, 0
+    Output "LG Electronics LG HDR 4K 110MXDM7H234" (HDMI-A-1)
+      Current mode: 3840x2160 @ 60.000 Hz (preferred)
+      Logical position: 1707, 0
+
