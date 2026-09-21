@@ -1,0 +1,8 @@
+# nixos-rebuild build output symlink
+result
+result-*
+
+# Editor noise
+*.swp
+*~
+.direnv/
