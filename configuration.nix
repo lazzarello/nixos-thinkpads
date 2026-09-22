@@ -10,6 +10,7 @@
       ./hardware-configuration.nix
       ./desktop.nix
       ./neovim.nix
+      ./voxtype.nix
     ];
 
   # Use the systemd-boot EFI boot loader.
@@ -69,6 +70,14 @@
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
+
+  # Flakes. Needed because voxtype is not in nixpkgs and is installed from
+  # upstream's own flake; flake.lock pins it and its transitive inputs.
+  # nix-command is the modern CLI (nix build / nix flake), which flakes assume.
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
+  ];
 
   # List packages installed in system profile.
   # You can use https://search.nixos.org/ to find more packages (and options).
