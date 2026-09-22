@@ -23,11 +23,26 @@
     lazygit # lazyvim.plugins.extras.lang.git
     ripgrep # grep picker
     fd # file picker
+    fzf # snacks.picker native matcher
     gcc # treesitter compiles parsers with a C compiler
     gnumake
     unzip
     wget
     curl
+
+    # nvim-treesitter's `main` branch requires the tree-sitter CLI to build
+    # parsers; it will not fetch a prebuilt binary for itself. Without this,
+    # :checkhealth reports "tree-sitter-cli not found" and no parser beyond the
+    # handful bundled with the neovim package can be installed.
+    #
+    # Unrelated to Mason -- on the old Arch machine this came from the
+    # tree-sitter-cli distro package, not from Mason.
+    tree-sitter
+
+    # Optional but quality-of-life, all reported by :checkhealth:
+    imagemagick # snacks.image, converts non-PNG images
+    ghostscript # snacks.image, renders PDFs
+    sqlite # snacks.picker frecency and history storage
 
     # --- Lua (config editing, lua_ls is wired up via .neoconf.json) ---
     lua-language-server
