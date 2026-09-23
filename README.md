@@ -2,6 +2,33 @@
 
 Declarative configuration for a ThinkPad P1 running NixOS 26.05 with Niri.
 
+TODO: Answer the question why the only way to rebuild/switch after introducing flakes is `sudo nixos-rebuild switch --flake ~/nixos#nixos`
+Any other way produces the following build error
+
+```
+[lee@nixos:~/nixos]$ sudo nixos-rebuild build
+building the system configuration...
+error:
+       … while evaluating the attribute 'config'
+         at /nix/store/f7c3haxy2l30bk7srg6lgaxzgh1q89zx-source/lib/modules.nix:402:9:
+          401|         options = checked options;
+          402|         config = checked (removeAttrs config [ "_module" ]);
+             |         ^
+          403|         _module = checked (config._module);
+
+       … while calling the 'seq' builtin
+         at /nix/store/f7c3haxy2l30bk7srg6lgaxzgh1q89zx-source/lib/modules.nix:402:18:
+          401|         options = checked options;
+          402|         config = checked (removeAttrs config [ "_module" ]);
+             |                  ^
+          403|         _module = checked (config._module);
+
+       (stack trace truncated; use '--show-trace' to show the full, detailed trace)
+
+       error: file 'nixos-config' was not found in the Nix search path (add it using $NIX_PATH or -I)
+Command 'nix-build '<nixpkgs/nixos>' --attr config.system.build.toplevel' returned non-zero exit status 1.
+```
+
 ## Layout
 
 | File | Owns |

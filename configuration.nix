@@ -18,7 +18,7 @@
   boot.loader.efi.canTouchEfiVariables = true;
 
   boot.initrd.luks.devices."luks-f7fadf6a-afee-403c-9ded-a455529cadd2".device = "/dev/disk/by-uuid/f7fadf6a-afee-403c-9ded-a455529cadd2";
-  networking.hostName = "nixos"; # Define your hostname.
+  networking.hostName = "phillip"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
   # Configure network proxy if necessary
@@ -87,6 +87,7 @@
     htop
     tmux
     firefox
+    tailscale
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
