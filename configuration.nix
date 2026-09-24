@@ -11,6 +11,7 @@
       ./desktop.nix
       ./neovim.nix
       ./voxtype.nix
+      ./suspend-debug.nix
     ];
 
   # Use the systemd-boot EFI boot loader.
