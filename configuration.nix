@@ -50,6 +50,7 @@
   services.xserver.xkb = {
     layout = "us";
     variant = "";
+    options = "ctrl:nocaps";
   };
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
@@ -88,6 +89,7 @@
     tmux
     firefox
     tailscale
+    python314Packages.pip
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
@@ -102,6 +104,8 @@
 
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;
+  services.resolved.enable = true;
+  services.tailscale.enable = true;
 
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];

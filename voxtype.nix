@@ -78,6 +78,15 @@ in
       pkgs.which
     ];
 
+    # Raise this to "debug" when diagnosing output or hotkey problems. It is
+    # what revealed that the output-backend probes were failing on a missing
+    # `which` rather than on the backends themselves.
+    #
+    # Deliberately set here rather than via a drop-in in
+    # ~/.config/systemd/user/voxtype.service.d/ -- a stale hand-written unit in
+    # that directory silently shadowed this one earlier and wasted an evening.
+    environment.RUST_LOG = "info";
+
     serviceConfig = {
       Type = "simple";
       ExecStart = "${config.programs.voxtype.package}/bin/voxtype daemon";
