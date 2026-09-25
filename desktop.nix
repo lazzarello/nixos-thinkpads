@@ -1,8 +1,47 @@
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
 
+let
+  # Toggle wrapper around wl-screenrec.
+  #
+  # Recording needs an explicit stop, unlike niri's one-shot screenshot action,
+  # so a single key has to both start and stop. Stopping uses SIGINT so the
+  # muxer writes the container trailer -- SIGKILL leaves an unplayable file.
+  #
+  # Set SCREENREC_AUDIO_DEVICE to also record audio; use a sink's .monitor for
+  # desktop sound or an input for the mic (`pactl list short sources`).
+  screenrec = pkgs.writeShellApplication {
+    name = "screenrec";
+    runtimeInputs = with pkgs; [
+      wl-screenrec
+      slurp
+      coreutils # date, basename, mkdir, sort, cut, seq, sleep
+      findutils # find, to locate the newest recording
+      procps # pkill is not used, but kill -0 needs a real shell builtin only
+    ];
+    text = builtins.readFile ./screenrec.sh;
+  };
+in
 {
   # Graphics and window management
-  hardware.graphics.enable = true;
+  hardware.graphics = {
+    enable = true;
+
+    # VAAPI, for hardware video encode/decode.
+    #
+    # Needed by wl-screenrec, which encodes on the GPU by default. Without a
+    # VAAPI driver only /run/opengl-driver/lib/dri/*_drv_video.so for other
+    # vendors exist (nouveau, radeonsi, virtio) and no Intel one, so hardware
+    # encoding fails and recording falls back to --no-hw or does not work.
+    #
+    # This GPU is Coffee Lake (UHD P630), which the iHD driver from
+    # intel-media-driver supports. intel-vaapi-driver is the older i965 for
+    # pre-Broadwell parts and is not used here.
+    extraPackages = with pkgs; [
+      intel-media-driver # iHD
+      libva-vdpau-driver
+      intel-compute-runtime
+    ];
+  };
   programs.niri.enable = true;
 
   # Desktop shell and automatic session startup.
@@ -75,6 +114,17 @@
     XCURSOR_SIZE = "24";
   };
 
+  # File sharing to phones and other machines on the LAN.
+  #
+  # The module installs the package and opens TCP+UDP 53317, which localsend
+  # needs both for discovery and transfer. openFirewall defaults to true; it is
+  # stated explicitly here so the firewall hole is visible in this file rather
+  # than implied by a default.
+  programs.localsend = {
+    enable = true;
+    openFirewall = true;
+  };
+
   # Audio and Bluetooth.
   security.rtkit.enable = true;
   services.pipewire = {
@@ -102,12 +152,26 @@
     # Screenshot, annotation and screen recording. DMS exposes screenshot and
     # clipboard IPC targets and binds keys to them, but does not pull in the
     # binaries, so those actions fail silently without these.
+    # Screenshots themselves are a niri built-in action (Print / Ctrl+Print /
+    # Alt+Print, saved to ~/Pictures/Screenshots), so grim is not needed for
+    # those. It is kept because other tools shell out to it.
     grim # capture
     slurp # select a region
     satty # annotate
+
+    # Inspect VAAPI support: `vainfo` should list the iHD driver and its
+    # supported encode entrypoints.
+    libva-utils
+
+    # pulseaudio provides pactl, for `pactl list short sources` -- the command
+    # wl-screenrec's own --audio-device help text tells you to use. Only the
+    # client tools are installed; the daemon is not used, pipewire-pulse is.
+    pulseaudio
     wl-clipboard # wl-copy / wl-paste
     cliphist # clipboard history, used by the DMS clipboard UI
     wl-screenrec # screen recording (wlroots, hardware encoded)
+    screenrec # the toggle wrapper defined above, bound to Mod+Print
+    vlc
 
     # Provides the Adwaita xcursor theme under share/icons/Adwaita/cursors.
     adwaita-icon-theme

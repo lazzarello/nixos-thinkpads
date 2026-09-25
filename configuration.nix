@@ -12,6 +12,7 @@
       ./neovim.nix
       ./voxtype.nix
       ./suspend-debug.nix
+      ./windows-vm.nix
     ];
 
   # Use the systemd-boot EFI boot loader.
