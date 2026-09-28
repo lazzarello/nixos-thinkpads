@@ -92,6 +92,8 @@
     firefox
     tailscale
     python314Packages.pip
+    docker
+    fish
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
