@@ -62,6 +62,7 @@
     # "input" lets DankMaterialShell use its evdev backend; without it DMS
     # logs a permissions warning and falls back to the sysfs backend.
     extraGroups = [ "networkmanager" "wheel" "input" ];
+    shell = pkgs.fish;
     packages = with pkgs; [];
   };
 
@@ -84,6 +85,7 @@
 
   # List packages installed in system profile.
   # You can use https://search.nixos.org/ to find more packages (and options).
+  # My user gets packages above too. Neat! Some scoping I should probs figure out.
   environment.systemPackages = with pkgs; [
     vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
     git
@@ -93,7 +95,6 @@
     tailscale
     python314Packages.pip
     docker
-    fish
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
@@ -103,6 +104,8 @@
   #   enable = true;
   #   enableSSHSupport = true;
   # };
+  # Fish shell enabled
+  programs.fish.enable = true;
 
   # List services that you want to enable:
 
