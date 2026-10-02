@@ -125,6 +125,9 @@ in
     openFirewall = true;
   };
 
+  # File management and removable/network media.
+  services.gvfs.enable = true;
+
   # Audio and Bluetooth.
   security.rtkit.enable = true;
   services.pipewire = {
@@ -144,7 +147,6 @@ in
   #
   # The dms-shell module enables power-profiles-daemon but not upower.
   services.upower.enable = true;
-
   environment.systemPackages = with pkgs; [
     alacritty
     xwayland-satellite
@@ -173,9 +175,14 @@ in
     screenrec # the toggle wrapper defined above, bound to Mod+Print
     vlc
 
+    # Lightweight file manager with UDisks2/GVfs removable and network media support.
+    thunar
+    thunar-volman
+    gvfs
+    tumbler
+
     # Provides the Adwaita xcursor theme under share/icons/Adwaita/cursors.
     adwaita-icon-theme
-
     noctalia-greeter
 
     # A theme actually named "default", inheriting Adwaita. This is the
@@ -187,12 +194,14 @@ in
       printf '[Icon Theme]\nName=default\nComment=Default cursor theme\nInherits=Adwaita\n' \
         > $out/share/icons/default/index.theme
     '')
+
     # Software dev utilities
     # OpenAI Codex
     codex
     # Pi Coding Agent
-    # Installed from `nix profile add github:NixOS/nixpkgs/nixos-unstable#pi-coding-agent``
-    # pi-coding-agent
+    # Installed from `nix profile add github:NixOS/nixpkgs/nixos-unstable#pi-coding-agent`
     # devenv installed through `nix profile install nixpkgs#devenv`
+    # RTK (Rust Token Killer)
+    # Installed from `nix profile add github:NixOS/nixpkgs/nixos-unstable#rtk`
   ];
 }
