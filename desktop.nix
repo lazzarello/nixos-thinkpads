@@ -114,6 +114,12 @@ in
     XCURSOR_SIZE = "24";
   };
 
+  # Alacritty must use a Nerd Font for LazyVim's file/status icons.
+  environment.etc."xdg/alacritty/alacritty.toml".text = ''
+    [font]
+    normal = { family = "JetBrainsMono Nerd Font Mono" }
+  '';
+
   # File sharing to phones and other machines on the LAN.
   #
   # The module installs the package and opens TCP+UDP 53317, which localsend
@@ -149,6 +155,7 @@ in
   services.upower.enable = true;
   environment.systemPackages = with pkgs; [
     alacritty
+    nerd-fonts.jetbrains-mono
     xwayland-satellite
 
     # Screenshot, annotation and screen recording. DMS exposes screenshot and

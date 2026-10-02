@@ -17,6 +17,7 @@
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
+  boot.loader.systemd-boot.configurationLimit = 10;
   boot.loader.efi.canTouchEfiVariables = true;
 
   boot.initrd.luks.devices."luks-f7fadf6a-afee-403c-9ded-a455529cadd2".device = "/dev/disk/by-uuid/f7fadf6a-afee-403c-9ded-a455529cadd2";
