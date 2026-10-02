@@ -154,6 +154,7 @@ in
   services.upower.enable = true;
   environment.systemPackages = with pkgs; [
     alacritty
+    fuzzel
     xwayland-satellite
 
     # Screenshot, annotation and screen recording. DMS exposes screenshot and
@@ -174,6 +175,7 @@ in
     # wl-screenrec's own --audio-device help text tells you to use. Only the
     # client tools are installed; the daemon is not used, pipewire-pulse is.
     pulseaudio
+    brightnessctl # brightness keys used by the niri config
     wl-clipboard # wl-copy / wl-paste
     cliphist # clipboard history, used by the DMS clipboard UI
     wl-screenrec # screen recording (wlroots, hardware encoded)
