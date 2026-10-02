@@ -115,10 +115,9 @@ in
   };
 
   # Alacritty must use a Nerd Font for LazyVim's file/status icons.
-  environment.etc."xdg/alacritty/alacritty.toml".text = ''
-    [font]
-    normal = { family = "JetBrainsMono Nerd Font Mono" }
-  '';
+  # Make Nerd Font glyphs available as fallback without changing Alacritty's
+  # existing font.
+  fonts.packages = with pkgs; [ nerd-fonts.symbols-only ];
 
   # File sharing to phones and other machines on the LAN.
   #
@@ -155,7 +154,6 @@ in
   services.upower.enable = true;
   environment.systemPackages = with pkgs; [
     alacritty
-    nerd-fonts.jetbrains-mono
     xwayland-satellite
 
     # Screenshot, annotation and screen recording. DMS exposes screenshot and
