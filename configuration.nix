@@ -95,6 +95,7 @@
     tailscale
     python314Packages.pip
     docker
+    usbutils
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
@@ -113,6 +114,7 @@
   services.openssh.enable = true;
   services.resolved.enable = true;
   services.tailscale.enable = true;
+  services.udisks2.enable = true;
 
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];

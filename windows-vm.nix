@@ -161,8 +161,8 @@ let
       rdp_open() {
         local response
         exec 3<>/dev/tcp/127.0.0.1/3389 2>/dev/null || return 1
-        printf '\x03\x00\x00\x13\x0e\xe0\x00\x00\x00\x00\x00\x00\x01\x00\x08\x00\x03\x00\x00\x00' >&3
-        response=$(timeout 3 dd if=/dev/fd/3 bs=1 count=4 status=none 2>/dev/null | od -An -tx1)
+        printf '\x03\x00\x00\x13\x0e\xe0\x00\x00\x00\x00\x00\x01\x00\x08\x00\x03\x00\x00\x00' >&3
+        response=$(timeout 3 head -c 4 <&3 2>/dev/null | od -An -tx1)
         exec 3<&- 3>&-
         [[ $response == *'03 00'* ]]
       }
@@ -196,12 +196,13 @@ let
           keep_alive=false
           [[ ''${2-} == --keep-alive || ''${2-} == -k ]] && keep_alive=true
 
-          # dockur creates data.img before unattended Setup finishes. Therefore
-          # its presence does NOT mean Windows is installed; windows.boot is the
-          # marker dockur writes after it has booted successfully from the disk.
-          # Until that marker exists, keep the VM running and hand over noVNC.
-          if [[ ! -f "$STORAGE/windows.boot" ]]; then
-            echo "Windows ${cfg.version} is not installed yet -- starting Setup."
+          # data.img is created before unattended Setup finishes. On a truly
+          # fresh install, hand the user noVNC immediately; otherwise use the
+          # RDP handshake below as the authoritative readiness check. Do not
+          # infer installation state from a Dockur marker: older/completed
+          # guests can retain setup media and have no such marker.
+          if [[ ! -f "$STORAGE/data.img" ]]; then
+            echo "No Windows image yet -- starting a fresh Windows ${cfg.version} install."
             echo "Downloading the ISO and running Setup: expect 15-30 minutes."
             notify-send "Installing Windows" "First boot: downloading ISO and running Setup" -t 20000
             "''${COMPOSE[@]}" up -d || die "Failed to start the installer. Logs: windows-vm logs"
@@ -218,12 +219,13 @@ let
             "''${COMPOSE[@]}" up -d || { notify-send -u critical "Windows VM" "Failed to start"; exit 1; }
           fi
 
-          # The container's published port can be open while Windows is still
-          # booting, including when this command finds an already-running VM.
+          # The container's published port can be open before Windows RDP is
+          # ready, and this also handles an already-running guest.
           echo "Waiting for RDP on 127.0.0.1:3389 ..."
           wait_for_rdp || {
             notify-send -u critical "Windows VM" "RDP never came up"
-            die "Timed out. Inspect the console: windows-vm console   (logs: windows-vm logs)"
+            xdg-open http://127.0.0.1:8006 >/dev/null 2>&1 || true
+            die "RDP is not ready; VM left running. Inspect: windows-vm console"
           }
 
           # Export WIN_USERNAME/WIN_PASSWORD for the RDP client below.
