@@ -187,9 +187,12 @@ in
       printf '[Icon Theme]\nName=default\nComment=Default cursor theme\nInherits=Adwaita\n' \
         > $out/share/icons/default/index.theme
     '')
-    # AI utilities
+    # Software dev utilities
     # OpenAI Codex
     codex
     # Pi Coding Agent
+    # Installed from `nix profile add github:NixOS/nixpkgs/nixos-unstable#pi-coding-agent``
+    # pi-coding-agent
+    # devenv installed through `nix profile install nixpkgs#devenv`
   ];
 }

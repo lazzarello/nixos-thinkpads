@@ -155,10 +155,17 @@ let
         fi
       }
 
-      # Readiness: Omarchy grepped docker logs for "windows started successfully".
-      # A live TCP connect to 3389 is the actual precondition for RDP, so probe
-      # that instead of trusting a log string that upstream may reword.
-      rdp_open() { (exec 3<>/dev/tcp/127.0.0.1/3389) 2>/dev/null; }
+      # Docker's published port accepts TCP before the guest RDP service is
+      # ready, so a bare /dev/tcp connect is a false-positive. Send the small
+      # X.224 connection request and require an RDP negotiation response.
+      rdp_open() {
+        local response
+        exec 3<>/dev/tcp/127.0.0.1/3389 2>/dev/null || return 1
+        printf '\x03\x00\x00\x13\x0e\xe0\x00\x00\x00\x00\x00\x00\x01\x00\x08\x00\x03\x00\x00\x00' >&3
+        response=$(timeout 3 dd if=/dev/fd/3 bs=1 count=4 status=none 2>/dev/null | od -An -tx1)
+        exec 3<&- 3>&-
+        [[ $response == *'03 00'* ]]
+      }
 
       wait_for_rdp() {
         local i
@@ -189,12 +196,12 @@ let
           keep_alive=false
           [[ ''${2-} == --keep-alive || ''${2-} == -k ]] && keep_alive=true
 
-          # First run: no disk image yet. dockur downloads the Windows ISO and
-          # runs Setup unattended, which takes far longer than a normal boot and
-          # has nothing listening on 3389 until it finishes. Hand the user the
-          # noVNC console and exit rather than blocking on an RDP probe.
-          if [[ ! -f "$STORAGE/data.img" ]]; then
-            echo "No Windows image yet -- starting a fresh Windows ${cfg.version} install."
+          # dockur creates data.img before unattended Setup finishes. Therefore
+          # its presence does NOT mean Windows is installed; windows.boot is the
+          # marker dockur writes after it has booted successfully from the disk.
+          # Until that marker exists, keep the VM running and hand over noVNC.
+          if [[ ! -f "$STORAGE/windows.boot" ]]; then
+            echo "Windows ${cfg.version} is not installed yet -- starting Setup."
             echo "Downloading the ISO and running Setup: expect 15-30 minutes."
             notify-send "Installing Windows" "First boot: downloading ISO and running Setup" -t 20000
             "''${COMPOSE[@]}" up -d || die "Failed to start the installer. Logs: windows-vm logs"
@@ -209,12 +216,15 @@ let
           if [[ $(docker inspect -f '{{.State.Status}}' windows-vm 2>/dev/null) != running ]]; then
             notify-send "Starting Windows VM" "This can take 15-30 seconds" -t 15000
             "''${COMPOSE[@]}" up -d || { notify-send -u critical "Windows VM" "Failed to start"; exit 1; }
-            echo "Waiting for RDP on 127.0.0.1:3389 ..."
-            wait_for_rdp || {
-              notify-send -u critical "Windows VM" "RDP never came up"
-              die "Timed out. Inspect the console: windows-vm console   (logs: windows-vm logs)"
-            }
           fi
+
+          # The container's published port can be open while Windows is still
+          # booting, including when this command finds an already-running VM.
+          echo "Waiting for RDP on 127.0.0.1:3389 ..."
+          wait_for_rdp || {
+            notify-send -u critical "Windows VM" "RDP never came up"
+            die "Timed out. Inspect the console: windows-vm console   (logs: windows-vm logs)"
+          }
 
           # Export WIN_USERNAME/WIN_PASSWORD for the RDP client below.
           # The directive must sit immediately before `source` and that command
