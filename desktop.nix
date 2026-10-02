@@ -179,7 +179,7 @@ in
     noctalia-greeter
 
     # A theme actually named "default", inheriting Adwaita. This is the
-    # belt-and-braces half of the fix: any client that asks for "default"
+    # belt-and-suspenders half of the fix: any client that asks for "default"
     # without XCURSOR_THEME being set now resolves to real cursor files
     # instead of finding nothing.
     (runCommand "default-cursor-theme" { } ''
@@ -187,5 +187,9 @@ in
       printf '[Icon Theme]\nName=default\nComment=Default cursor theme\nInherits=Adwaita\n' \
         > $out/share/icons/default/index.theme
     '')
+    # AI utilities
+    # OpenAI Codex
+    codex
+    # Pi Coding Agent
   ];
 }
