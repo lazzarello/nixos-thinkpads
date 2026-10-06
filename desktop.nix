@@ -181,6 +181,7 @@ in
     wl-screenrec # screen recording (wlroots, hardware encoded)
     screenrec # the toggle wrapper defined above, bound to Mod+Print
     vlc
+    audacity
 
     # Lightweight file manager with UDisks2/GVfs removable and network media support.
     thunar
@@ -211,4 +212,30 @@ in
     # RTK (Rust Token Killer)
     # Installed from `nix profile add github:NixOS/nixpkgs/nixos-unstable#rtk`
   ];
+
+  services.logind.settings.Login = {
+    HandleLidSwitch = "ignore";
+    HandleLidSwitchExternalPower = "ignore";
+    HandleLidSwitchDocked = "ignore";
+  };
+
+  systemd.user.services."lid-display@" = {
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = "${pkgs.niri}/bin/niri msg output eDP-1 %i";
+    };
+  };
+
+  services.acpid = {
+    enable = true;
+    handlers.lid = {
+      event = "button/lid.*";
+      action = ''
+        case "$1" in
+          *close) ${pkgs.systemd}/bin/systemctl --user --machine=lee@.host start lid-display@off.service ;;
+          *open)  ${pkgs.systemd}/bin/systemctl --user --machine=lee@.host start lid-display@on.service ;;
+        esac
+      '';
+    };
+  };
 }

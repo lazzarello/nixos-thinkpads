@@ -97,6 +97,10 @@
     python314Packages.pip
     docker
     usbutils
+    coreutils
+    zip
+    ast-grep
+    openssl
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
