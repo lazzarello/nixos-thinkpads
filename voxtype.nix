@@ -76,6 +76,11 @@ in
       # xclip is available" -- even though all of them are installed and work.
       # The error names the wrong missing program.
       pkgs.which
+
+      # Meeting mode uses pactl to find PipeWire monitor sources and parec to
+      # capture them. A systemPackages entry is not visible in this unit's
+      # restricted PATH.
+      pkgs.pulseaudio
     ];
 
     # Raise this to "debug" when diagnosing output or hotkey problems. It is
