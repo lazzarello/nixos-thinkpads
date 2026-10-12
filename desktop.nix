@@ -224,6 +224,7 @@ in
     # auto-updater cannot write into the read-only store path, so the flake
     # input is the only way it moves.
     pkgs-unstable.claude-code
+    pkgs-unstable.tuple
 
     # Pi Coding Agent
     # Installed from `nix profile add github:NixOS/nixpkgs/nixos-unstable#pi-coding-agent`
