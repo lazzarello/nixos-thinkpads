@@ -10,6 +10,15 @@
     #   nix flake update nixpkgs
     nixpkgs.url = "github:NixOS/nixpkgs/ecc58f32d1069a3e3f8a991e2233d365689f748d";
 
+    # Unstable, used only for packages that have to track upstream closely.
+    # Currently that is just claude-code, which ships several releases a week
+    # while the pinned nixpkgs above deliberately stays put (it has 2.1.223;
+    # unstable is normally within a patch of the npm release).
+    #
+    # Kept as its own input so bumping it is also a single, deliberate act:
+    #   nix flake update nixpkgs-unstable
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
+
     voxtype = {
       url = "github:peteonrails/voxtype";
       # Build voxtype against our nixpkgs rather than its own, so we do not end
@@ -19,14 +28,33 @@
   };
 
   outputs =
-    { nixpkgs, voxtype, ... }:
+    {
+      nixpkgs,
+      nixpkgs-unstable,
+      voxtype,
+      ...
+    }:
+    let
+      system = "x86_64-linux";
+    in
     {
       nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
+        inherit system;
 
         # Make the flake inputs visible to modules, so desktop.nix and friends
         # can reach voxtype.packages without importing the flake again.
-        specialArgs = { inherit voxtype; };
+        specialArgs = {
+          inherit voxtype;
+
+          # A second package set for the handful of packages taken from
+          # unstable. This is a separate instantiation, so the
+          # nixpkgs.config set in configuration.nix does not reach it --
+          # allowUnfree has to be repeated here (claude-code is unfree).
+          pkgs-unstable = import nixpkgs-unstable {
+            inherit system;
+            config.allowUnfree = true;
+          };
+        };
 
         modules = [
           ./configuration.nix

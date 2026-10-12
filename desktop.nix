@@ -1,4 +1,10 @@
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  pkgs-unstable,
+  lib,
+  ...
+}:
 
 let
   # Toggle wrapper around wl-screenrec.
@@ -206,6 +212,19 @@ in
     # Software dev utilities
     # OpenAI Codex
     codex
+
+    # Claude Code, from nixpkgs-unstable rather than the pinned nixpkgs.
+    #
+    # Upstream releases several times a week and the pinned revision lags well
+    # behind (2.1.223 there vs 2.1.295 in unstable at the time of writing).
+    # Taking it from unstable keeps it current without moving the rest of the
+    # system; `nix flake update nixpkgs-unstable` pulls the next release.
+    #
+    # Note the package is a fixed version -- Claude Code's own in-place
+    # auto-updater cannot write into the read-only store path, so the flake
+    # input is the only way it moves.
+    pkgs-unstable.claude-code
+
     # Pi Coding Agent
     # Installed from `nix profile add github:NixOS/nixpkgs/nixos-unstable#pi-coding-agent`
     # devenv installed through `nix profile install nixpkgs#devenv`
