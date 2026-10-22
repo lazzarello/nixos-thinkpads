@@ -24,7 +24,7 @@ let
       findutils # find, to locate the newest recording
       procps # pkill is not used, but kill -0 needs a real shell builtin only
     ];
-    text = builtins.readFile ./screenrec.sh;
+    text = builtins.readFile ./scripts/screenrec.sh;
   };
 in
 {
@@ -188,6 +188,7 @@ in
     screenrec # the toggle wrapper defined above, bound to Mod+Print
     vlc
     audacity
+    signal-desktop
 
     # Lightweight file manager with UDisks2/GVfs removable and network media support.
     thunar
@@ -203,15 +204,11 @@ in
     # belt-and-suspenders half of the fix: any client that asks for "default"
     # without XCURSOR_THEME being set now resolves to real cursor files
     # instead of finding nothing.
-    (runCommand "default-cursor-theme" { } ''
-      mkdir -p $out/share/icons/default
-      printf '[Icon Theme]\nName=default\nComment=Default cursor theme\nInherits=Adwaita\n' \
-        > $out/share/icons/default/index.theme
-    '')
+    (runCommand "default-cursor-theme" { } (builtins.readFile ./scripts/default-cursor-theme.sh))
 
     # Software dev utilities
     # OpenAI Codex
-    codex
+    # codex
 
     # Claude Code, from nixpkgs-unstable rather than the pinned nixpkgs.
     #
@@ -250,12 +247,10 @@ in
     enable = true;
     handlers.lid = {
       event = "button/lid.*";
-      action = ''
-        case "$1" in
-          *close) ${pkgs.systemd}/bin/systemctl --user --machine=lee@.host start lid-display@off.service ;;
-          *open)  ${pkgs.systemd}/bin/systemctl --user --machine=lee@.host start lid-display@on.service ;;
-        esac
-      '';
+      action = builtins.replaceStrings
+        [ "@systemctl@" ]
+        [ "${pkgs.systemd}/bin/systemctl" ]
+        (builtins.readFile ./scripts/lid-display.sh);
     };
   };
 }

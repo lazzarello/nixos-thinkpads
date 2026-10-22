@@ -65,6 +65,7 @@
     # --- lang.typescript.tsgo / lang.json / lang.yaml ---
     nodejs
     typescript
+    typescript-go
     typescript-language-server
     vscode-langservers-extracted # json, html, css, eslint
     yaml-language-server
