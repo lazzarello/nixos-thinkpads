@@ -9,6 +9,7 @@
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
       ./desktop.nix
+      ./discord.nix
       ./neovim.nix
       ./voxtype.nix
       ./suspend-debug.nix
@@ -90,6 +91,7 @@
   environment.systemPackages = with pkgs; [
     vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
     git
+    delta
     htop
     tmux
     firefox
@@ -110,6 +112,11 @@
   #   enable = true;
   #   enableSSHSupport = true;
   # };
+  programs.git.config = {
+    core.pager = "delta";
+    delta.side-by-side = true;
+  };
+
   # Fish shell enabled
   programs.fish.enable = true;
 
