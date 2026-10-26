@@ -207,7 +207,9 @@ in
     (runCommand "default-cursor-theme" { } (builtins.readFile ./scripts/default-cursor-theme.sh))
 
     # Software dev utilities
-    # OpenAI Codex
+    glow
+    github-cli
+    # OpenAI Codex moved to unstable via a profile to get configs for latest models
     # codex
 
     # Claude Code, from nixpkgs-unstable rather than the pinned nixpkgs.
