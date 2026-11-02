@@ -103,6 +103,7 @@
     openssl
     pciutils
     pcsc-tools
+    libnotify
   ];
 
   # Some programs need SUID wrappers, can be configured further or are

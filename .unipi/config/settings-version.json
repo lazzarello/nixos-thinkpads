@@ -1,0 +1,19 @@
+{
+  "migrated_version": "3.0.0",
+  "finalized": false,
+  "appliedAt": "2026-11-02T22:20:42.063Z",
+  "log": [
+    {
+      "action": "skipped:missing",
+      "from": "/home/lee/nixos/.unipi/config/compactor.json"
+    },
+    {
+      "action": "skipped:missing",
+      "from": "/home/lee/nixos/.unipi/fusion-preset.json"
+    },
+    {
+      "action": "skipped:missing",
+      "from": "/home/lee/nixos/.unipi/config/background-tasks.json"
+    }
+  ]
+}
