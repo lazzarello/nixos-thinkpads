@@ -8,6 +8,7 @@
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
+      ./boot.nix
       ./desktop.nix
       ./discord.nix
       ./neovim.nix
@@ -16,20 +17,16 @@
       ./windows-vm.nix
     ];
 
-  # Use the systemd-boot EFI boot loader.
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.systemd-boot.configurationLimit = 10;
-  boot.loader.efi.canTouchEfiVariables = true;
-
-  boot.initrd.luks.devices."luks-f7fadf6a-afee-403c-9ded-a455529cadd2".device = "/dev/disk/by-uuid/f7fadf6a-afee-403c-9ded-a455529cadd2";
   networking.hostName = "phillip"; # Define your hostname.
-  # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
   # Configure network proxy if necessary
   # networking.proxy.default = "http://user:password@proxy:port/";
   # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
 
   # Enable networking
+  # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
+  # enables a different setup: standalone wpa_supplicant management. It isn’t a master Wi-Fi
+  # switch. NetworkManager handles Wi-Fi itself, so you should leave that line commented.
   networking.networkmanager.enable = true;
 
   # Set your time zone.
@@ -122,7 +119,6 @@
 
   # List services that you want to enable:
 
-  # Enable the OpenSSH daemon.
   services.openssh.enable = true;
   services.resolved.enable = true;
   services.tailscale.enable = true;
