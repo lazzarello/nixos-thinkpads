@@ -19,6 +19,11 @@
     #   nix flake update nixpkgs-unstable
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
 
+    fingerprint-sensor = {
+      url = "github:ahbnr/nixos-06cb-009a-fingerprint-sensor/24.11";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     voxtype = {
       url = "github:peteonrails/voxtype";
       # Build voxtype against our nixpkgs rather than its own, so we do not end
@@ -31,6 +36,7 @@
     {
       nixpkgs,
       nixpkgs-unstable,
+      fingerprint-sensor,
       voxtype,
       ...
     }:
@@ -44,7 +50,7 @@
         # Make the flake inputs visible to modules, so desktop.nix and friends
         # can reach voxtype.packages without importing the flake again.
         specialArgs = {
-          inherit voxtype;
+          inherit voxtype fingerprint-sensor;
 
           # A second package set for the handful of packages taken from
           # unstable. This is a separate instantiation, so the

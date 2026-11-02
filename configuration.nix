@@ -10,6 +10,7 @@
       ./hardware-configuration.nix
       ./boot.nix
       ./desktop.nix
+      ./fingerprint.nix
       ./discord.nix
       ./neovim.nix
       ./voxtype.nix
@@ -100,6 +101,7 @@
     zip
     ast-grep
     openssl
+    pciutils
   ];
 
   # Some programs need SUID wrappers, can be configured further or are

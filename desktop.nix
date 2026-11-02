@@ -78,6 +78,10 @@ in
       command = "${pkgs.noctalia-greeter}/bin/noctalia-greeter-session";
       user = "greeter";
     };
+    settings.initial_session = {
+     user = "lee";
+     command = "${pkgs.niri}/bin/niri-session";
+   };
   };
 
   # greetd's own module sets services.displayManager.enable, which generates
@@ -107,6 +111,7 @@ in
 
     [keyboard]
     layout = "us"
+
   '';
 
   # Cursor theme for user sessions.
