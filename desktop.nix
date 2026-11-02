@@ -209,6 +209,7 @@ in
     # Software dev utilities
     glow
     github-cli
+    mermaid-cli
     # OpenAI Codex moved to unstable via a profile to get configs for latest models
     # codex
 
