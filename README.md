@@ -154,8 +154,7 @@ NixOS automatically adds fingerprint PAM to its PAM services; no hand-written
 PAM stack is needed. Following the wiki's password-fallback guidance, generic
 `login`, Noctalia's `greetd`, DMS's password stack, and SSH stay password-only.
 DMS uses a separate fingerprint stack, so its password entry does not wait for
-the scanner. Keep a
-terminal open while testing authentication changes.
+the scanner. Keep a terminal open while testing authentication changes.
 
 **Noctalia Greeter:** enter your account password. Fingerprint authentication
 is explicitly disabled in its `greetd` PAM service, and empty-password
@@ -182,9 +181,40 @@ dms ipc settings close
 
 DMS caches reader/enrollment availability. `enableFprint = true` alone does not
 refresh it; opening Lock Screen settings does. If the check fails, inspect
-`dms ipc settings get lockFingerprintReason`. Once ready, scanning starts
-automatically when the screen locks; there is no activation button. Pressing
-Enter submits the password, so an empty Enter is not a fingerprint trigger in DMS.
+`dms ipc settings get lockFingerprintReason`. Scanning starts automatically
+when the session is locked **and the displays are awake**; there is no activation
+button. Pressing Enter submits the password, so an empty Enter is not a
+fingerprint trigger in DMS.
+
+### Idle lock and reader wake
+
+DMS and Quickshell are taken together from the existing unstable input (DMS
+1.6.3). The old DMS 1.4.6 kept scanning behind blank displays; our logs showed
+`Device disabled to prevent overheating` followed by repeated PAM errors.
+The newer shell pauses fingerprint verification while displays are off and
+re-arms it on wake. It also has retry backoff and resume recovery. Thermal
+protection is not disabled, and no constant-polling service is installed.
+
+With the current AC settings, a **25-minute absence** should work like this:
+
+| Time since last input | Expected behavior |
+|---|---|
+| 15 minutes | Displays turn off. |
+| 20 minutes | Session locks; reader remains idle while displays are off. |
+| 25 minutes, on return | Move the mouse or press Shift to wake the displays, then touch the enrolled index finger. |
+
+The lock timeout remains **20 minutes**, not 25. Touching the reader alone
+while the displays are off is not the wake gesture. Password unlock remains
+available. To check the same dark-lock transition without waiting 25 minutes,
+run this yourself when ready to lock and blank the displays:
+
+```sh
+dms ipc lock lockAndOutputsOff
+```
+
+Leave it locked, wake with mouse/Shift, and try the enrolled finger. The actual
+25-minute idle/wake cycle still needs a hands-on test; successful immediate
+PAM verification alone does not prove that cycle.
 
 This is mutable user state, like the other DMS settings. Noctalia Shell is not
 installed; migrating to its lockscreen would need its own PAM configuration.

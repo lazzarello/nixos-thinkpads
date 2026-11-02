@@ -53,6 +53,9 @@ in
   # Desktop shell and automatic session startup.
   programs.dms-shell = {
     enable = true;
+    # Newer DMS pauses fingerprint scans while displays are off and recovers on wake.
+    package = pkgs-unstable.dms-shell;
+    quickshell.package = pkgs-unstable.quickshell;
     systemd.enable = true;
     enableCalendarEvents = false;
     enableAudioWavelength = false;

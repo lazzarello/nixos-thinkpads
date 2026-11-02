@@ -102,6 +102,7 @@
     ast-grep
     openssl
     pciutils
+    pcsc-tools
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
@@ -125,6 +126,7 @@
   services.resolved.enable = true;
   services.tailscale.enable = true;
   services.udisks2.enable = true;
+  services.pcscd.enable = true;
 
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];

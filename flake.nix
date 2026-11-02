@@ -11,9 +11,8 @@
     nixpkgs.url = "github:NixOS/nixpkgs/ecc58f32d1069a3e3f8a991e2233d365689f748d";
 
     # Unstable, used only for packages that have to track upstream closely.
-    # Currently that is just claude-code, which ships several releases a week
-    # while the pinned nixpkgs above deliberately stays put (it has 2.1.223;
-    # unstable is normally within a patch of the npm release).
+    # Includes DMS/Quickshell for idle fingerprint recovery, alongside apps
+    # such as claude-code and Tuple. The rest of the system stays pinned.
     #
     # Kept as its own input so bumping it is also a single, deliberate act:
     #   nix flake update nixpkgs-unstable
