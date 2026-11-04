@@ -113,6 +113,7 @@
   #   enable = true;
   #   enableSSHSupport = true;
   # };
+  programs.git.enable = true;
   programs.git.config = {
     core.pager = "delta";
     delta.side-by-side = true;
@@ -128,6 +129,10 @@
   services.tailscale.enable = true;
   services.udisks2.enable = true;
   services.pcscd.enable = true;
+  # Restore daemon access whenever the AU9540 re-enumerates, including after suspend.
+  services.udev.extraRules = ''
+    SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="058f", ATTR{idProduct}=="9540", GROUP="pcscd", MODE="0660"
+  '';
 
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];

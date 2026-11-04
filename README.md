@@ -230,6 +230,23 @@ Quickshell test of DMS's exact `assets/pam/fprint` stack authenticated `lee`
 with the enrolled finger, and DMS lockscreen unlock was confirmed by hand.
 Password-only greeter login and suspend/resume still need hands-on tests.
 
+## Smartcard reader (`058f:9540`)
+
+`configuration.nix` enables `pcscd` and gives the Alcor AU9540 USB device
+permissions `0660`, group `pcscd`, through a device-specific udev rule. The rule
+applies whenever the reader appears, including re-enumeration after suspend.
+The daemon stays unprivileged; no world-writable device permissions are needed.
+
+If both `pcsc_scan` and the timeclock report no readers while `lsusb -d 058f:9540`
+still finds it, check `journalctl -b -u pcscd.service` for `LIBUSB_ERROR_ACCESS`.
+Inspect the device path shown by `lsusb` with `getfacl`: the `pcscd` group needs
+read/write access. A user ACL alone is insufficient because the daemon runs as
+`pcscd`, not as the desktop user. Manual device permission fixes disappear when
+the USB device is recreated.
+
+After rebuilding and rebooting, run `pcsc_scan -r`, then repeat after a
+suspend/resume cycle. Both should list the reader without manual permission changes.
+
 ## Discord
 
 Launch **Discord** from the application menu or run `discord`. The official
