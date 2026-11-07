@@ -186,6 +186,28 @@ when the session is locked **and the displays are awake**; there is no activatio
 button. Pressing Enter submits the password, so an empty Enter is not a
 fingerprint trigger in DMS.
 
+Our local DMS patch adds a **Retry fingerprint** button below the password field
+when a failed scan leaves the reader inactive (including while automatic retry
+is waiting). Click it or press **Ctrl+R** to start a new scan. Password entry
+remains available and partially typed passwords are kept.
+The button does not reset the failed-match limit; at the maximum, use your
+password. It is hidden while scanning, authenticating a password, or while
+fingerprint authentication is disabled/paused.
+
+The patch is applied by `desktop.nix` before DMS embeds its QML. After rebuilding,
+restart DMS **while unlocked** to load it; do not restart the shell while locked:
+
+```sh
+sudo nixos-rebuild switch --flake "path:$HOME/nixos#nixos"
+systemctl --user restart dms
+```
+
+Regression check against a patched DMS source tree:
+
+```sh
+node scripts/test-dms-fingerprint-retry.mjs /path/to/patched/DankMaterialShell
+```
+
 ### Idle lock and reader wake
 
 DMS and Quickshell are taken together from the existing unstable input (DMS

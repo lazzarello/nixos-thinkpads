@@ -1,0 +1,32 @@
+diff --git a/quickshell/Modules/Lock/LockScreenContent.qml b/quickshell/Modules/Lock/LockScreenContent.qml
+--- a/quickshell/Modules/Lock/LockScreenContent.qml
++++ b/quickshell/Modules/Lock/LockScreenContent.qml
+@@ -1499,6 +1499,28 @@ Item {
+                 }
+             }
+ 
++            DankButton {
++                id: fingerprintRetryButton
++
++                Layout.alignment: Qt.AlignHCenter
++                text: I18n.tr("Retry fingerprint (Ctrl+R)")
++                iconName: "fingerprint"
++                visible: !root.demoMode && !root.unlocking && !pam.passwd.active && pam.fprint.allowed && !pam.fprint.active && (pam.fprint.errorTries > 0 || pam.fprint.tries > 0)
++                enabled: visible
++                Accessible.role: Accessible.Button
++                Accessible.name: text
++                onClicked: {
++                    pam.fprint.recover();
++                    root.focusPasswordField();
++                }
++
++                Shortcut {
++                    sequence: "Ctrl+R"
++                    enabled: fingerprintRetryButton.visible
++                    onActivated: fingerprintRetryButton.clicked()
++                }
++            }
++
+             StyledText {
+                 id: authFeedbackText
+ 

@@ -50,11 +50,23 @@ in
   };
   programs.niri.enable = true;
 
+  # Allow AppImage bundles to be installed
+  programs.appimage = {
+      enable = true;
+      binfmt = true;
+  };
+
   # Desktop shell and automatic session startup.
   programs.dms-shell = {
     enable = true;
     # Newer DMS pauses fingerprint scans while displays are off and recovers on wake.
-    package = pkgs-unstable.dms-shell;
+    package = pkgs-unstable.dms-shell.overrideAttrs (old: {
+      # The build starts in core/; the embedded QML lives alongside it.
+      postPatch = (old.postPatch or "") + ''
+        chmod -R u+w ../quickshell
+        patch -d .. -p1 < ${./patches/dms-fingerprint-retry.patch}
+      '';
+    });
     quickshell.package = pkgs-unstable.quickshell;
     systemd.enable = true;
     enableCalendarEvents = false;
